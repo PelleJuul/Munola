@@ -26,18 +26,6 @@ float Munola::getFractionalDuration() const
     return d;
 }
 
-int Munola::getMidiPitch()
-{
-    return 12 * (octave + 1 + octaveMod) + pitch;
-}
-
-void Munola::setPitch(const Munola &other)
-{
-    pitch = other.pitch;
-    octave = other.octave;
-    octaveMod = other.octaveMod;
-}
-
 std::string Munola::getDurationString() const
 {
     std::string res = "";
@@ -60,110 +48,21 @@ std::string Munola::getDurationString() const
     return res;
 }
 
-std::string Munola::to_string() const
+int Munola::getMidiPitch() const
 {
-    if (type == MunolaType::Note)
-    {
-        std::string res = "";
+    return 12 * (octave + 1 + octaveMod) + pitch;
+}
 
-        // res += std::to_string(duration);
-        res += getDurationString();
-
-        int o = octaveMod;
-
-        while (o > 0)
-        {
-            res += "^";
-            o--;
-        }
-
-        while (o < 0)
-        {
-            res += "_";
-            o++;
-        }
-
-        switch (pitch % 12)
-        {
-            case 0:   res += "C";  break; 
-            case 1:   res += "#C"; break; 
-            case 2:   res += "D";  break; 
-            case 3:   res += "#D"; break; 
-            case 4:   res += "E";  break; 
-            case 5:   res += "F";  break; 
-            case 6:   res += "#F"; break; 
-            case 7:   res += "G";  break; 
-            case 8:   res += "#G"; break; 
-            case 9:   res += "A";  break; 
-            case 10:  res += "#A"; break; 
-            case 11:  res += "B";  break; 
-        }
-
-        return res;
-    }
-
-    if (type == MunolaType::Rest)
-    {
-        return getDurationString() + "r";
-    }
-
-    if (type == MunolaType::Command)
-    {
-        if (command == MunolaCommand::Octave)
-        {
-            return std::to_string(octave);
-        }
-    }
-
-    if (type == MunolaType::Function)
-    {
-        std::string res = "";
-
-        res += function + "(";
-
-        for (int i = 0; i < args.size(); i++)
-        {
-            res += args[i];
-
-            if (i < args.size() - 1)
-            {
-                res += ", ";
-            }
-        }
-
-        res += ")";
-
-        return res;
-    }
-
-    if (type == MunolaType::End)
-    {
-        return "";
-    }
-
-    return "?";
+void Munola::setPitch(const Munola &other)
+{
+    pitch = other.pitch;
+    octave = other.octave;
+    octaveMod = other.octaveMod;
 }
 
 void Munola::print(std::string end)
 {
     printf("%s%s", to_string().c_str(), end.c_str());
-}
-
-void split(const Munola &m, Munola *a, Munola *b)
-{
-    *a = m;
-    a->duration *= 0.5;
-
-    if (a->doubles > 0)
-    {
-        a->doubles -= 1;
-    }
-    else
-    {
-        a->halves += 1;
-    }
-
-    *b = *a;
 }
 
 bool isWhitespace(char c)
@@ -176,36 +75,7 @@ bool isLowerCaseLetter(char c)
     return c >= 'a' && c <= 'z';
 }
 
-int computeIntensity(const MunolaSequence &s)
-{
-    int intensity = 0;
-
-    for (auto n : s)
-    {
-        intensity += n.halves - n.doubles;
-    }
-
-    return intensity;
-}
-
-float getSequenceDuration(std::vector<Munola> &vec)
-{
-    float duration = 0.0;
-
-    for (int i = 0; i < vec.size(); i++)
-    {
-        Munola &m = vec[i];
-
-        if (m.type == MunolaType::Note || m.type == MunolaType::Rest)
-        {
-            duration += m.getFractionalDuration();
-        }
-    }
-
-    return duration;
-}
-
-std::vector<Munola> parseMunola(std::string text)
+std::vector<Munola> Munola::parse(std::string text)
 {
     std::vector<Munola> stack;
 
@@ -347,4 +217,88 @@ std::vector<Munola> parseMunola(std::string text)
     }
 
     return stack;
+}
+
+std::string Munola::to_string() const
+{
+    if (type == MunolaType::Note)
+    {
+        std::string res = "";
+
+        // res += std::to_string(duration);
+        res += getDurationString();
+
+        int o = octaveMod;
+
+        while (o > 0)
+        {
+            res += "^";
+            o--;
+        }
+
+        while (o < 0)
+        {
+            res += "_";
+            o++;
+        }
+
+        switch (pitch % 12)
+        {
+            case 0:   res += "C";  break; 
+            case 1:   res += "#C"; break; 
+            case 2:   res += "D";  break; 
+            case 3:   res += "#D"; break; 
+            case 4:   res += "E";  break; 
+            case 5:   res += "F";  break; 
+            case 6:   res += "#F"; break; 
+            case 7:   res += "G";  break; 
+            case 8:   res += "#G"; break; 
+            case 9:   res += "A";  break; 
+            case 10:  res += "#A"; break; 
+            case 11:  res += "B";  break; 
+        }
+
+        return res;
+    }
+
+    if (type == MunolaType::Rest)
+    {
+        return getDurationString() + "r";
+    }
+
+    if (type == MunolaType::Command)
+    {
+        if (command == MunolaCommand::Octave)
+        {
+            return std::to_string(octave);
+        }
+    }
+
+    if (type == MunolaType::Function)
+    {
+        std::string res = "";
+
+        res += function + "(";
+
+        for (int i = 0; i < args.size(); i++)
+        {
+            res += args[i];
+
+            if (i < args.size() - 1)
+            {
+                res += ", ";
+            }
+        }
+
+        res += ")";
+
+        return res;
+    }
+
+    if (type == MunolaType::End)
+    {
+        return "";
+    }
+
+    return "?";
 }

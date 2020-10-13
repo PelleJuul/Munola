@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <vector>
 
+/// Enumeration of the various types of Munola elements.
+///
 enum MunolaType
 {
     Unknown,
@@ -15,6 +17,8 @@ enum MunolaType
     Function
 };
 
+/// Enumeration of the various Munola commands.
+///
 enum MunolaCommand
 {
     None,
@@ -26,8 +30,51 @@ enum MunolaCommand
     Flat,
 };
 
-struct Munola
+/// The Munola class which represents a single Munola elements, e.g. a note,
+/// rest, or function call.
+class Munola
 {
+    public:
+
+    /// Get a string representing the duration of this note --- a combination of
+    /// `+`, `-`, and `.`.
+    /// @returns    A string representing the duration of this note.
+    std::string getDurationString() const;
+
+    /// The the duration as a fractional number in beats. For example the
+    /// fractional duration for `.C` will be 1.5.
+    /// @returns    The fractional duration in beats.
+    float getFractionalDuration() const;
+
+    /// Get the MIDI pitch number of this note.
+    /// @returns    The MIDI pitch.
+    int getMidiPitch() const;
+
+    /// Print a string representation of this note to std::out.
+    /// @param  end     What to print after the generated string.
+    void print(std::string end="\n");
+
+    /// Parse a string into a vector of Munola objects.
+    /// @param  text    The text to parse.
+    /// @returns        A vector of the parsed Munola objects.
+    static std::vector<Munola> parse(std::string text);
+
+    /// Set the pitch of this note from another note.
+    /// @param  other   The other note whose pitch will be copied.
+    void setPitch(const Munola &other);
+
+    /// Get a string representing the duration of this note.
+    /// @returns    A string representing the duration of this note.
+    operator std::string() const
+    {
+        return to_string();
+    };
+
+    /// Get a string representing the duration of this note.
+    /// @returns    A string representing the duration of this note.
+    std::string to_string() const;
+
+    private:
     MunolaType type = MunolaType::Unknown;
     MunolaCommand command = MunolaCommand::None;
     std::string function = "";
@@ -41,33 +88,4 @@ struct Munola
     int dots = 0;
     float duration = 1.0;
     int octaveMod = 0;
-
-    float getFractionalDuration() const;
-    int getMidiPitch();
-
-    std::string getDurationString() const;
-
-    std::string to_string() const;
-
-    void setPitch(const Munola &other);
-
-    void print(std::string end="\n");
-
-    operator std::string() const
-    {
-        return to_string();
-    };
 };
-
-using MunolaSequence = std::vector<Munola>;
-using SequenceCollection = std::vector<MunolaSequence>;
-
-void split(const Munola &m, Munola *a, Munola *b);
-
-void evalMunola(std::vector<Munola> &stack);
-
-int computeIntensity(const MunolaSequence &s);
-
-float getSequenceDuration(std::vector<Munola> &vec);
-
-std::vector<Munola> parseMunola(std::string text);
