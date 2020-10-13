@@ -102,3 +102,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
+## TODO
+
+Munola and the C++ implementation contained here is still in early stages. This
+is some of the stuff I would like to add
+
+- Add support for nested function calls.
+- Move code into a `Munola` namespace, such that `parseMunola` becomes `Munola::parse`.
+- Add more examples.
+- Add support for chords.
+- Make a C implementation that can be used on embedded platforms.
+
